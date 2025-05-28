@@ -41,7 +41,7 @@ npm run build
 
 # 创建 systemd 服务文件
 echo "⚙️  创建 systemd 服务..."
-cat > /etc/systemd/system/process-keeper.service << 'EOF'
+cat > /etc/systemd/system/mamager.service << 'EOF'
 [Unit]
 Description=Process Keeper - 进程保活管理器
 After=network.target
@@ -49,7 +49,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/root/process-keeper
+WorkingDirectory=/root/mamager
 Environment=NODE_ENV=production
 Environment=PORT=3000
 ExecStart=/usr/bin/npm start
@@ -57,7 +57,7 @@ Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=process-keeper
+SyslogIdentifier=mamager
 
 [Install]
 WantedBy=multi-user.target
@@ -67,7 +67,7 @@ EOF
 systemctl daemon-reload
 
 # 启用服务
-systemctl enable process-keeper
+systemctl enable mamager
 
 # 创建防火墙规则（如果使用 ufw）
 if command -v ufw &> /dev/null; then
@@ -76,15 +76,15 @@ if command -v ufw &> /dev/null; then
 fi
 
 # 创建日志目录
-mkdir -p /var/log/process-keeper
+mkdir -p /var/log/mamager
 
 echo "✅ 部署完成！"
 echo ""
 echo "🔧 管理命令："
-echo "   启动服务: systemctl start process-keeper"
-echo "   停止服务: systemctl stop process-keeper"
-echo "   查看状态: systemctl status process-keeper"
-echo "   查看日志: journalctl -u process-keeper -f"
+echo "   启动服务: systemctl start mamager"
+echo "   停止服务: systemctl stop mamager"
+echo "   查看状态: systemctl status mamager"
+echo "   查看日志: journalctl -u mamager -f"
 echo ""
 echo "🌐 访问地址: http://your-server-ip:3000"
 echo ""
@@ -98,7 +98,7 @@ echo ""
 read -p "是否立即启动服务？(y/n): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    systemctl start process-keeper
+    systemctl start mamager
     echo "✅ 服务已启动"
-    systemctl status process-keeper
+    systemctl status mamager
 fi

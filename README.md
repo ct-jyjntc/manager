@@ -77,7 +77,8 @@ npm run dev
 │   └── process-logs.tsx        # 日志查看组件
 ├── lib/
 │   ├── utils.ts                # 工具函数
-│   └── process-manager.ts      # 进程管理器
+│   ├── process-manager.ts      # 进程管理器
+│   └── real-process-manager.ts # 实际进程管理逻辑
 ├── types/
 │   └── process.ts              # 类型定义
 └── README.md
@@ -98,7 +99,8 @@ Content-Type: application/json
 {
   "name": "进程名称",
   "command": "执行命令",
-  "autoRestart": true
+  "autoRestart": true,
+  "cwd": "/optional/path/to/working/directory"
 }
 ```
 
@@ -127,9 +129,15 @@ DELETE /api/processes/{id}
 ### 自动部署 (推荐)
 
 1. **下载项目到 Debian 服务器**:
+   确保项目位于 `/root/mamager` 目录。
+   例如，将项目克隆到该位置：
 ```bash
-git clone <your-repo-url>
-cd process-keeper
+sudo mkdir -p /root/mamager
+sudo git clone <your-repo-url> /root/mamager
+cd /root/mamager
+# 如果您已在其他位置克隆了项目，请将其移动或复制到 /root/mamager
+# 例如: sudo mv /path/to/your/cloned/project-directory /root/mamager
+# 然后: cd /root/mamager
 ```
 
 2. **运行自动部署脚本**:
@@ -171,19 +179,19 @@ pm2 start ecosystem.config.js
 
 ```bash
 # 启动服务
-sudo systemctl start process-keeper
+sudo systemctl start mamager
 
 # 停止服务
-sudo systemctl stop process-keeper
+sudo systemctl stop mamager
 
 # 重启服务
-sudo systemctl restart process-keeper
+sudo systemctl restart mamager
 
 # 查看状态
-sudo systemctl status process-keeper
+sudo systemctl status mamager
 
 # 查看日志
-sudo journalctl -u process-keeper -f
+sudo journalctl -u mamager -f
 ```
 
 ## 注意事项
