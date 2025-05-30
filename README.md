@@ -129,15 +129,15 @@ DELETE /api/processes/{id}
 ### 自动部署 (推荐)
 
 1. **下载项目到 Debian 服务器**:
-   确保项目位于 `/root/mamager` 目录。
+   确保项目位于 `/root/manager` 目录。
    例如，将项目克隆到该位置：
 ```bash
-sudo mkdir -p /root/mamager
-sudo git clone <your-repo-url> /root/mamager
-cd /root/mamager
-# 如果您已在其他位置克隆了项目，请将其移动或复制到 /root/mamager
-# 例如: sudo mv /path/to/your/cloned/project-directory /root/mamager
-# 然后: cd /root/mamager
+sudo mkdir -p /root/manager
+sudo git clone <your-repo-url> /root/manager
+cd /root/manager
+# 如果您已在其他位置克隆了项目，请将其移动或复制到 /root/manager
+# 例如: sudo mv /path/to/your/cloned/project-directory /root/manager
+# 然后: cd /root/manager
 ```
 
 2. **运行自动部署脚本**:
@@ -179,19 +179,19 @@ pm2 start ecosystem.config.js
 
 ```bash
 # 启动服务
-sudo systemctl start mamager
+sudo systemctl start manager
 
 # 停止服务
-sudo systemctl stop mamager
+sudo systemctl stop manager
 
 # 重启服务
-sudo systemctl restart mamager
+sudo systemctl restart manager
 
 # 查看状态
-sudo systemctl status mamager
+sudo systemctl status manager
 
 # 查看日志
-sudo journalctl -u mamager -f
+sudo journalctl -u manager -f
 ```
 
 ## 注意事项
