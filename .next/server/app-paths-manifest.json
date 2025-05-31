@@ -1,6 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/api/processes/export/route": "app/api/processes/export/route.js",
-  "/api/processes/import/route": "app/api/processes/import/route.js",
-  "/api/processes/route": "app/api/processes/route.js"
-}
