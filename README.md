@@ -10,6 +10,7 @@
 - **实时监控**: 查看进程状态、运行时间、PID等信息
 - **日志管理**: 查看进程运行日志，支持下载和清除
 - **自动重启**: 支持进程异常退出后自动重启
+- **配置管理**: 导入和导出进程配置，支持备份和迁移
 
 ### 🎨 现代化界面
 - **响应式设计**: 适配桌面和移动设备
@@ -61,6 +62,13 @@ npm run dev
 - 在弹出的日志窗口中查看详细的运行日志
 - 支持下载日志文件
 - 支持清除历史日志
+
+### 配置管理
+- 点击页面右上角的"配置管理"按钮
+- **导出配置**: 将当前所有进程配置导出为 JSON 文件，可用于备份
+- **导入配置**: 从 JSON 文件批量导入进程配置，同名进程会被跳过
+- 配置文件包含进程名称、命令、工作目录和自动重启设置
+- 不包含运行状态、日志等运行时数据
 
 ## 项目结构
 
@@ -122,6 +130,30 @@ Content-Type: application/json
 ### 删除进程
 ```
 DELETE /api/processes/{id}
+```
+
+### 导出配置
+```
+GET /api/processes/export
+```
+
+### 导入配置
+```
+POST /api/processes/import
+Content-Type: application/json
+
+{
+  "version": "1.0",
+  "exportTime": "2025-05-31T10:30:00.000Z",
+  "processes": [
+    {
+      "name": "进程名称",
+      "command": "执行命令",
+      "autoRestart": true,
+      "cwd": "/optional/path/to/working/directory"
+    }
+  ]
+}
 ```
 
 ## Debian 系统部署

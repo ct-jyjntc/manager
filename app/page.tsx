@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Play, Square, RotateCcw, Trash2, Activity, Server, FileText } from 'lucide-react'
+import { Plus, Play, Square, RotateCcw, Trash2, Activity, Server, FileText, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProcessLogs } from '@/components/process-logs'
+import { ConfigManager } from '@/components/config-manager'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Process } from '@/types/process'
 
 export default function Home() {
@@ -15,6 +17,12 @@ export default function Home() {
   const [newProcessCwd, setNewProcessCwd] = useState('/root')
   const [loading, setLoading] = useState(false)
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null)
+  const [showConfigManager, setShowConfigManager] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; processId: string; processName: string }>({
+    show: false,
+    processId: '',
+    processName: ''
+  })
 
   useEffect(() => {
     fetchProcesses()
@@ -89,10 +97,15 @@ export default function Home() {
 
       if (response.ok) {
         fetchProcesses()
+        setDeleteConfirm({ show: false, processId: '', processName: '' })
       }
     } catch (error) {
       console.error('删除进程失败:', error)
     }
+  }
+
+  const confirmDelete = (processId: string, processName: string) => {
+    setDeleteConfirm({ show: true, processId, processName })
   }
 
   const getStatusColor = (status: string) => {
@@ -116,12 +129,24 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          进程保活管理器
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          现代化的进程监控和管理系统
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              进程保活管理器
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              现代化的进程监控和管理系统
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowConfigManager(true)}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            配置管理
+          </Button>
+        </div>
       </div>
 
       {/* 添加新进程 */}
@@ -239,7 +264,7 @@ export default function Home() {
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => deleteProcess(process.id)}
+                  onClick={() => confirmDelete(process.id, process.name)}
                   className="flex items-center gap-1"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -271,6 +296,26 @@ export default function Home() {
           onClose={() => setSelectedProcess(null)}
         />
       )}
+
+      {/* 配置管理模态框 */}
+      {showConfigManager && (
+        <ConfigManager
+          onClose={() => setShowConfigManager(false)}
+          onImportSuccess={fetchProcesses}
+        />
+      )}
+
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.show}
+        title="确认删除进程"
+        description={`确定要删除进程 "${deleteConfirm.processName}" 吗？此操作不可逆转。`}
+        onConfirm={() => deleteProcess(deleteConfirm.processId)}
+        onCancel={() => setDeleteConfirm({ show: false, processId: '', processName: '' })}
+        confirmText="删除"
+        cancelText="取消"
+        isDestructive={true}
+      />
     </div>
   )
 }

@@ -1,0 +1,80 @@
+{
+  "we5p7ye93": {
+    "id": "we5p7ye93",
+    "name": "测试日志",
+    "command": "echo 测试",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:10:02.065Z",
+    "restartCount": 0,
+    "autoRestart": false,
+    "cwd": "/tmp",
+    "logs": [
+      "2025-05-31T12:10:02.065Z: 进程已创建"
+    ]
+  },
+  "4z48z8c5d": {
+    "id": "4z48z8c5d",
+    "name": "Python Web服务",
+    "command": "python3 app.py",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:12:42.305Z",
+    "restartCount": 0,
+    "autoRestart": true,
+    "cwd": "/root/web-server",
+    "logs": [
+      "2025-05-31T12:12:42.305Z: 进程已创建"
+    ]
+  },
+  "cb7pexz6f": {
+    "id": "cb7pexz6f",
+    "name": "数据处理脚本",
+    "command": "python3 data_processor.py --config config.json",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:12:42.305Z",
+    "restartCount": 0,
+    "autoRestart": true,
+    "cwd": "/root/data-processing",
+    "logs": [
+      "2025-05-31T12:12:42.305Z: 进程已创建"
+    ]
+  },
+  "scewwzvxf": {
+    "id": "scewwzvxf",
+    "name": "日志监控",
+    "command": "tail -f /var/log/application.log",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:12:42.305Z",
+    "restartCount": 0,
+    "autoRestart": false,
+    "cwd": "/root",
+    "logs": [
+      "2025-05-31T12:12:42.305Z: 进程已创建"
+    ]
+  },
+  "yrrktobtr": {
+    "id": "yrrktobtr",
+    "name": "Redis服务器",
+    "command": "redis-server /etc/redis/redis.conf",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:12:42.306Z",
+    "restartCount": 0,
+    "autoRestart": true,
+    "cwd": "/root",
+    "logs": [
+      "2025-05-31T12:12:42.306Z: 进程已创建"
+    ]
+  },
+  "4p09o1f56": {
+    "id": "4p09o1f56",
+    "name": "定时任务",
+    "command": "node scheduler.js",
+    "status": "stopped",
+    "createdAt": "2025-05-31T12:12:42.306Z",
+    "restartCount": 0,
+    "autoRestart": true,
+    "cwd": "/root/scheduler",
+    "logs": [
+      "2025-05-31T12:12:42.306Z: 进程已创建"
+    ]
+  }
+}

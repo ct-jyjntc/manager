@@ -280,6 +280,19 @@ class RealProcessManager {
       });
     });
   }
+
+  // 清除进程日志
+  clearProcessLogs(id: string): boolean {
+    const process = this.processes.get(id);
+    if (!process) {
+      return false;
+    }
+
+    const now = new Date().toISOString();
+    process.logs = [`${now}: 日志已清除`];
+    this.saveProcesses();
+    return true;
+  }
 }
 
 // 单例模式

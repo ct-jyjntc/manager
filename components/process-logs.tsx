@@ -32,8 +32,26 @@ export function ProcessLogs({ process, onClose }: ProcessLogsProps) {
   }
 
   const clearLogs = async () => {
-    // 这里可以添加清除日志的API调用
-    console.log('清除日志功能需要后端支持')
+    if (!confirm('确定要清除所有日志吗？此操作不可逆。')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/processes/${process.id}/logs`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        setLogs([]);
+        alert('日志已清除');
+      } else {
+        const error = await response.text();
+        alert(`清除日志失败: ${error}`);
+      }
+    } catch (error) {
+      console.error('清除日志失败:', error);
+      alert('清除日志失败: 网络错误');
+    }
   }
 
   return (

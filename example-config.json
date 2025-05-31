@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "exportTime": "2025-05-31T10:30:00.000Z",
+  "processes": [
+    {
+      "name": "Python Web服务",
+      "command": "python3 app.py",
+      "autoRestart": true,
+      "cwd": "/root/web-server"
+    },
+    {
+      "name": "数据处理脚本",
+      "command": "python3 data_processor.py --config config.json",
+      "autoRestart": true,
+      "cwd": "/root/data-processing"
+    },
+    {
+      "name": "日志监控",
+      "command": "tail -f /var/log/application.log",
+      "autoRestart": false,
+      "cwd": "/root"
+    },
+    {
+      "name": "Redis服务器",
+      "command": "redis-server /etc/redis/redis.conf",
+      "autoRestart": true,
+      "cwd": "/root"
+    },
+    {
+      "name": "定时任务",
+      "command": "node scheduler.js",
+      "autoRestart": true,
+      "cwd": "/root/scheduler"
+    }
+  ]
+}
