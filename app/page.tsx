@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Plus, Play, Square, RotateCcw, Trash2, Activity, Server, FileText, Settings } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus, Play, Square, RotateCcw, Trash2, Activity, Server, FileText, Settings, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,20 +23,85 @@ export default function Home() {
     processId: '',
     processName: ''
   })
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
+  const [connectionError, setConnectionError] = useState(false)
 
   useEffect(() => {
     fetchProcesses()
-  }, [])
+    
+    // 启动自动刷新
+    if (autoRefresh) {
+      startAutoRefresh()
+    }
 
-  const fetchProcesses = async () => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [autoRefresh])
+
+  const startAutoRefresh = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    intervalRef.current = setInterval(() => {
+      fetchProcesses(true) // 静默刷新
+    }, 5000) // 每5秒刷新一次主页面
+  }
+
+  const stopAutoRefresh = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }
+
+  const fetchProcesses = async (silent = false) => {
+    if (!silent) {
+      setIsRefreshing(true)
+    }
     try {
       const response = await fetch('/api/processes')
       if (response.ok) {
         const data = await response.json()
         setProcesses(data)
+        setLastUpdateTime(new Date())
+        setConnectionError(false)
+        
+        // 如果有选中的进程，更新其数据
+        if (selectedProcess) {
+          const updatedProcess = data.find((p: Process) => p.id === selectedProcess.id)
+          if (updatedProcess) {
+            setSelectedProcess(updatedProcess)
+          }
+        }
+      } else {
+        setConnectionError(true)
       }
     } catch (error) {
       console.error('获取进程列表失败:', error)
+      setConnectionError(true)
+    } finally {
+      if (!silent) {
+        setIsRefreshing(false)
+      }
+    }
+  }
+
+  const handleManualRefresh = () => {
+    fetchProcesses(false)
+  }
+
+  const toggleAutoRefresh = () => {
+    setAutoRefresh(!autoRefresh)
+    if (!autoRefresh) {
+      startAutoRefresh()
+    } else {
+      stopAutoRefresh()
     }
   }
 
@@ -127,117 +192,207 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+    <div className="container mx-auto py-4 md:py-8 px-4">
+      {/* 头部区域 - 响应式布局 */}
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               进程保活管理器
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              现代化的进程监控和管理系统
-            </p>
+            <div className="text-sm md:text-base text-gray-600 dark:text-gray-300 space-y-1">
+              <div>现代化的进程监控和管理系统</div>
+              <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+                <span>当前管理 {processes.length} 个进程</span>
+                <span>•</span>
+                <span>{processes.filter(p => p.status === 'running').length} 个正在运行</span>
+                {lastUpdateTime && (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">
+                      最后更新: {lastUpdateTime.toLocaleTimeString()}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowConfigManager(true)}
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            配置管理
-          </Button>
+          
+          {/* 控制面板 - 响应式 */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 lg:gap-3">
+            {/* 连接状态 */}
+            <div className="flex items-center gap-1 text-xs md:text-sm order-last sm:order-first">
+              {connectionError ? (
+                <WifiOff className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
+              ) : (
+                <Wifi className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+              )}
+              <span className={connectionError ? 'text-red-500' : 'text-green-500'}>
+                {connectionError ? '离线' : '在线'}
+              </span>
+            </div>
+            
+            {/* 控制按钮组 */}
+            <div className="flex items-center gap-1 md:gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-1 md:gap-2 h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm"
+              >
+                <RefreshCw className={`h-3 w-3 md:h-4 md:w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">刷新</span>
+              </Button>
+              <Button
+                variant={autoRefresh ? "default" : "outline"}
+                size="sm"
+                onClick={toggleAutoRefresh}
+                className="flex items-center gap-1 md:gap-2 h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm"
+              >
+                <Activity className={`h-3 w-3 md:h-4 md:w-4 ${autoRefresh ? 'animate-pulse' : ''}`} />
+                <span className="hidden lg:inline">{autoRefresh ? '自动刷新开' : '自动刷新关'}</span>
+                <span className="lg:hidden">自动</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowConfigManager(true)}
+                className="flex items-center gap-1 md:gap-2 h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm"
+              >
+                <Settings className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">配置</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 添加新进程 */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+      {/* 添加新进程 - 优化移动端布局 */}
+      <Card className="mb-6 md:mb-8">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
             添加新进程
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm">
             创建一个新的进程管理任务
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Input
-              placeholder="进程名称"
-              value={newProcessName}
-              onChange={(e) => setNewProcessName(e.target.value)}
-            />
-            <Input
-              placeholder="执行命令 (例如: python3 /root/app.py)"
-              value={newProcessCommand}
-              onChange={(e) => setNewProcessCommand(e.target.value)}
-              className="md:col-span-1 lg:col-span-2"
-            />
-            <Input
-              placeholder="工作目录 (例如: /root)"
-              value={newProcessCwd}
-              onChange={(e) => setNewProcessCwd(e.target.value)}
-            />
+          <div className="space-y-4">
+            {/* 进程基本信息 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  进程名称
+                </label>
+                <Input
+                  placeholder="例如: Web服务器"
+                  value={newProcessName}
+                  onChange={(e) => setNewProcessName(e.target.value)}
+                  className="h-9 md:h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  工作目录
+                </label>
+                <Input
+                  placeholder="例如: /root/project"
+                  value={newProcessCwd}
+                  onChange={(e) => setNewProcessCwd(e.target.value)}
+                  className="h-9 md:h-10"
+                />
+              </div>
+            </div>
+            
+            {/* 执行命令 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                执行命令
+              </label>
+              <Input
+                placeholder="例如: python3 app.py --port 8080"
+                value={newProcessCommand}
+                onChange={(e) => setNewProcessCommand(e.target.value)}
+                className="h-9 md:h-10"
+              />
+            </div>
+            
+            {/* 创建按钮 */}
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={createProcess}
+                disabled={loading || !newProcessName.trim() || !newProcessCommand.trim()}
+                className="w-full sm:w-auto h-9 md:h-10"
+              >
+                {loading ? '创建中...' : '创建进程'}
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={createProcess}
-            className="mt-4"
-            disabled={loading || !newProcessName.trim() || !newProcessCommand.trim()}
-          >
-            {loading ? '创建中...' : '创建进程'}
-          </Button>
         </CardContent>
       </Card>
 
       {/* 进程列表 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {processes.map((process) => (
-          <Card key={process.id} className="relative">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="truncate">{process.name}</span>
-                <div className="flex items-center gap-1">
+          <Card key={process.id} className="relative hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span className="text-base md:text-lg font-medium truncate">{process.name}</span>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   {getStatusIcon(process.status)}
-                  <span className={`text-sm font-medium ${getStatusColor(process.status)}`}>
+                  <span className={`text-xs md:text-sm font-medium ${getStatusColor(process.status)}`}>
                     {process.status === 'running' ? '运行中' : 
                      process.status === 'stopped' ? '已停止' : '错误'}
                   </span>
                 </div>
               </CardTitle>
-              <CardDescription className="truncate">
+              <CardDescription className="text-xs md:text-sm break-all">
                 {process.command}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                <div>创建时间: {new Date(process.createdAt).toLocaleString()}</div>
+            <CardContent className="pt-0">
+              {/* 进程信息 - 响应式网格 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs md:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <div className="truncate">
+                  <span className="font-medium">创建:</span> {new Date(process.createdAt).toLocaleDateString()}
+                </div>
                 {process.lastStarted && (
-                  <div>最后启动: {new Date(process.lastStarted).toLocaleString()}</div>
+                  <div className="truncate">
+                    <span className="font-medium">启动:</span> {new Date(process.lastStarted).toLocaleDateString()}
+                  </div>
                 )}
-                <div>工作目录: {process.cwd || '/root'}</div>
-                <div>重启次数: {process.restartCount}</div>
-                {process.pid && <div>进程ID: {process.pid}</div>}
+                <div className="truncate">
+                  <span className="font-medium">目录:</span> {process.cwd || '/root'}
+                </div>
+                <div>
+                  <span className="font-medium">重启:</span> {process.restartCount}次
+                  {process.pid && <span className="ml-2"><span className="font-medium">PID:</span> {process.pid}</span>}
+                </div>
               </div>
               
-              <div className="flex flex-wrap gap-2">
+              {/* 操作按钮 - 移动端优化 */}
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 {process.status !== 'running' ? (
                   <Button
                     size="sm"
                     onClick={() => performAction(process.id, 'start')}
-                    className="flex items-center gap-1"
+                    className="flex items-center justify-center gap-1 h-8 text-xs"
                   >
                     <Play className="h-3 w-3" />
-                    启动
+                    <span>启动</span>
                   </Button>
                 ) : (
                   <Button
                     size="sm"
                     variant="secondary"
                     onClick={() => performAction(process.id, 'stop')}
-                    className="flex items-center gap-1"
+                    className="flex items-center justify-center gap-1 h-8 text-xs"
                   >
                     <Square className="h-3 w-3" />
-                    停止
+                    <span>停止</span>
                   </Button>
                 )}
                 
@@ -245,30 +400,30 @@ export default function Home() {
                   size="sm"
                   variant="outline"
                   onClick={() => performAction(process.id, 'restart')}
-                  className="flex items-center gap-1"
+                  className="flex items-center justify-center gap-1 h-8 text-xs"
                 >
                   <RotateCcw className="h-3 w-3" />
-                  重启
+                  <span>重启</span>
                 </Button>
                 
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => setSelectedProcess(process)}
-                  className="flex items-center gap-1"
+                  className="flex items-center justify-center gap-1 h-8 text-xs col-span-1"
                 >
                   <FileText className="h-3 w-3" />
-                  日志
+                  <span>日志</span>
                 </Button>
                 
                 <Button
                   size="sm"
                   variant="destructive"
                   onClick={() => confirmDelete(process.id, process.name)}
-                  className="flex items-center gap-1"
+                  className="flex items-center justify-center gap-1 h-8 text-xs col-span-1"
                 >
                   <Trash2 className="h-3 w-3" />
-                  删除
+                  <span>删除</span>
                 </Button>
               </div>
             </CardContent>
@@ -294,6 +449,15 @@ export default function Home() {
         <ProcessLogs
           process={selectedProcess}
           onClose={() => setSelectedProcess(null)}
+          onProcessUpdate={(updatedProcess) => {
+            setSelectedProcess(updatedProcess)
+            // 同时更新进程列表中对应的进程
+            setProcesses(prevProcesses => 
+              prevProcesses.map(p => 
+                p.id === updatedProcess.id ? updatedProcess : p
+              )
+            )
+          }}
         />
       )}
 
