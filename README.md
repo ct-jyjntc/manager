@@ -178,13 +178,7 @@ chmod +x deploy-debian.sh
 sudo ./deploy-debian.sh
 ```
 
-3. **配置多服务器功能** (可选):
-```bash
-chmod +x multi-server-setup.sh
-sudo ./multi-server-setup.sh
-```
-
-4. **访问应用**:
+3. **访问应用**:
 ```
 http://your-server-ip:3000
 ```
@@ -231,6 +225,44 @@ sudo systemctl status manager
 # 查看日志
 sudo journalctl -u manager -f
 ```
+
+## 卸载说明
+
+### 完全卸载
+如果需要完全移除进程保活管理器及其所有组件：
+
+```bash
+chmod +x uninstall-debian.sh
+sudo ./uninstall-debian.sh
+```
+
+**完全卸载将删除：**
+- systemd 服务
+- PM2 进程
+- 应用程序文件
+- 配置和数据文件
+- 日志文件
+- 防火墙规则
+- 可选：Node.js、PM2、SSH密钥
+
+### 快速卸载
+如果只想移除应用程序（保留Node.js等系统组件）：
+
+```bash
+chmod +x quick-uninstall.sh
+sudo ./quick-uninstall.sh
+```
+
+**快速卸载将删除：**
+- 应用程序文件
+- 配置数据
+- 服务配置
+- 日志文件
+
+**保留：**
+- Node.js 和 npm
+- PM2
+- SSH 配置
 
 ## 注意事项
 
