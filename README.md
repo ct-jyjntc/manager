@@ -226,44 +226,6 @@ sudo systemctl status manager
 sudo journalctl -u manager -f
 ```
 
-## 卸载说明
-
-### 完全卸载
-如果需要完全移除进程保活管理器及其所有组件：
-
-```bash
-chmod +x uninstall-debian.sh
-sudo ./uninstall-debian.sh
-```
-
-**完全卸载将删除：**
-- systemd 服务
-- PM2 进程
-- 应用程序文件
-- 配置和数据文件
-- 日志文件
-- 防火墙规则
-- 可选：Node.js、PM2、SSH密钥
-
-### 快速卸载
-如果只想移除应用程序（保留Node.js等系统组件）：
-
-```bash
-chmod +x quick-uninstall.sh
-sudo ./quick-uninstall.sh
-```
-
-**快速卸载将删除：**
-- 应用程序文件
-- 配置数据
-- 服务配置
-- 日志文件
-
-**保留：**
-- Node.js 和 npm
-- PM2
-- SSH 配置
-
 ## 注意事项
 
 ✅ **真实进程管理**: 当前版本使用真实的 Node.js `child_process` 模块，可以在 Debian 系统上实际启动和管理进程。

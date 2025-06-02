@@ -25,8 +25,7 @@ class ProcessManager {
       createdAt: now,
       restartCount: 0,
       autoRestart,
-      logs: [`${now}: 进程已创建`],
-      serverId: 'local' // 模拟进程管理器始终使用local服务器ID
+      logs: [`${now}: 进程已创建`]
     };
 
     this.processes.set(id, process);

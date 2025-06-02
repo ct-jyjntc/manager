@@ -71,7 +71,6 @@ class RealProcessManager {
       restartCount: 0,
       autoRestart,
       cwd: cwd || '/root',
-      serverId: 'local', // 本地进程管理器始终使用local服务器ID
       logs: [`${now}: 进程已创建`]
     };
 

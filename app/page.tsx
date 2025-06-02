@@ -7,22 +7,17 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProcessLogs } from '@/components/process-logs'
 import { ConfigManager } from '@/components/config-manager'
-import { ServerManager } from '@/components/server-manager'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Process, Server as ServerType } from '@/types/process'
+import { Process } from '@/types/process'
 
 export default function Home() {
   const [processes, setProcesses] = useState<Process[]>([])
-  const [servers, setServers] = useState<ServerType[]>([])
-  const [selectedServerId, setSelectedServerId] = useState<string>('local')
   const [newProcessName, setNewProcessName] = useState('')
   const [newProcessCommand, setNewProcessCommand] = useState('')
   const [newProcessCwd, setNewProcessCwd] = useState('/root')
   const [loading, setLoading] = useState(false)
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null)
   const [showConfigManager, setShowConfigManager] = useState(false)
-  const [showServerManager, setShowServerManager] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; processId: string; processName: string }>({
     show: false,
     processId: '',
@@ -36,8 +31,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchProcesses()
-    fetchServers()
-
+    
     // 启动自动刷新
     if (autoRefresh) {
       startAutoRefresh()
@@ -77,7 +71,7 @@ export default function Home() {
         setProcesses(data)
         setLastUpdateTime(new Date())
         setConnectionError(false)
-
+        
         // 如果有选中的进程，更新其数据
         if (selectedProcess) {
           const updatedProcess = data.find((p: Process) => p.id === selectedProcess.id)
@@ -98,23 +92,6 @@ export default function Home() {
     }
   }
 
-  const fetchServers = async () => {
-    try {
-      const response = await fetch('/api/servers')
-      if (response.ok) {
-        const data = await response.json()
-        setServers(data)
-
-        // 如果当前选中的服务器不存在，切换到本地服务器
-        if (!data.find((s: ServerType) => s.id === selectedServerId)) {
-          setSelectedServerId('local')
-        }
-      }
-    } catch (error) {
-      console.error('获取服务器列表失败:', error)
-    }
-  }
-
   const handleManualRefresh = () => {
     fetchProcesses(false)
   }
@@ -129,7 +106,7 @@ export default function Home() {
   }
 
   const createProcess = async () => {
-    if (!newProcessName.trim() || !newProcessCommand.trim() || !selectedServerId) return
+    if (!newProcessName.trim() || !newProcessCommand.trim()) return
 
     setLoading(true)
     try {
@@ -143,7 +120,6 @@ export default function Home() {
           command: newProcessCommand,
           cwd: newProcessCwd,
           autoRestart: true,
-          serverId: selectedServerId,
         }),
       })
 
@@ -281,15 +257,6 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowServerManager(true)}
-                className="flex items-center gap-1 md:gap-2 h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm"
-              >
-                <Server className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">服务器</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 onClick={() => setShowConfigManager(true)}
                 className="flex items-center gap-1 md:gap-2 h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm"
               >
@@ -314,26 +281,6 @@ export default function Home() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* 服务器选择 */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                目标服务器
-              </label>
-              <Select value={selectedServerId} onValueChange={setSelectedServerId}>
-                <SelectTrigger className="h-9 md:h-10">
-                  <SelectValue placeholder="选择服务器" />
-                </SelectTrigger>
-                <SelectContent>
-                  {servers.map((server) => (
-                    <SelectItem key={server.id} value={server.id}>
-                      {server.name} ({server.host})
-                      {server.status === 'offline' ? ' - 离线' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* 进程基本信息 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -405,13 +352,6 @@ export default function Home() {
               <CardDescription className="text-xs md:text-sm break-all">
                 {process.command}
               </CardDescription>
-              {/* 服务器信息 */}
-              {process.serverName && (
-                <div className="mt-2 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                  <Server className="h-3 w-3" />
-                  <span>{process.serverName}</span>
-                </div>
-              )}
             </CardHeader>
             <CardContent className="pt-0">
               {/* 进程信息 - 响应式网格 */}
@@ -526,17 +466,6 @@ export default function Home() {
         <ConfigManager
           onClose={() => setShowConfigManager(false)}
           onImportSuccess={fetchProcesses}
-        />
-      )}
-
-      {/* 服务器管理模态框 */}
-      {showServerManager && (
-        <ServerManager
-          onClose={() => setShowServerManager(false)}
-          onServerChange={() => {
-            fetchServers()
-            fetchProcesses()
-          }}
         />
       )}
 
