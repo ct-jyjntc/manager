@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realProcessManager } from '@/lib/real-process-manager';
+import { multiServerProcessManager } from '@/lib/multi-server-process-manager';
 
 export async function GET(
   request: NextRequest,
@@ -7,15 +7,13 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-    const process = realProcessManager.getProcess(id);
+    const process = await multiServerProcessManager.getProcess(id);
 
     if (!process) {
       return NextResponse.json({ error: '进程不存在' }, { status: 404 });
     }
 
-    // 获取额外的进程统计信息
-    const stats = await realProcessManager.getProcessStats(id);
-    return NextResponse.json({ ...process, stats });
+    return NextResponse.json(process);
   } catch (error) {
     return NextResponse.json({ error: '获取进程信息失败' }, { status: 500 });
   }
@@ -32,13 +30,13 @@ export async function POST(
     let success = false;
     switch (action) {
       case 'start':
-        success = await realProcessManager.startProcess(id);
+        success = await multiServerProcessManager.startProcess(id);
         break;
       case 'stop':
-        success = realProcessManager.stopProcess(id);
+        success = await multiServerProcessManager.stopProcess(id);
         break;
       case 'restart':
-        success = await realProcessManager.restartProcess(id);
+        success = await multiServerProcessManager.restartProcess(id);
         break;
       default:
         return NextResponse.json({ error: '无效的操作' }, { status: 400 });
@@ -48,7 +46,7 @@ export async function POST(
       return NextResponse.json({ error: '操作失败' }, { status: 400 });
     }
 
-    const process = realProcessManager.getProcess(id);
+    const process = await multiServerProcessManager.getProcess(id);
     return NextResponse.json(process);
   } catch (error) {
     return NextResponse.json({ error: '操作失败' }, { status: 500 });
@@ -61,7 +59,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
-    const success = realProcessManager.deleteProcess(id);
+    const success = await multiServerProcessManager.deleteProcess(id);
 
     if (!success) {
       return NextResponse.json({ error: '进程不存在' }, { status: 404 });

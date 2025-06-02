@@ -178,7 +178,13 @@ chmod +x deploy-debian.sh
 sudo ./deploy-debian.sh
 ```
 
-3. **访问应用**:
+3. **配置多服务器功能** (可选):
+```bash
+chmod +x multi-server-setup.sh
+sudo ./multi-server-setup.sh
+```
+
+4. **访问应用**:
 ```
 http://your-server-ip:3000
 ```
