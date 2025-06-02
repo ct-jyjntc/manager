@@ -27,7 +27,8 @@ export function ConfigManager({ onClose, onImportSuccess }: ConfigManagerProps) 
   const exportConfig = async () => {
     setExporting(true)
     try {
-      const response = await fetch('/api/processes/export')
+      // 使用查询参数方式请求导出格式
+      const response = await fetch('/api/processes?format=export')
       if (!response.ok) {
         throw new Error('导出失败')
       }
