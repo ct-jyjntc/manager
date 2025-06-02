@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Upload, X, AlertCircle, CheckCircle, FileText } from 'lucide-react'
+import { Download, Upload, X, AlertCircle, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -75,21 +75,7 @@ export function ConfigManager({ onClose, onImportSuccess }: ConfigManagerProps) 
     }
   }
 
-  const loadExampleConfig = async () => {
-    try {
-      const response = await fetch('/example-config.json')
-      if (!response.ok) {
-        throw new Error('无法加载示例配置')
-      }
-      
-      const config = await response.json()
-      setPendingFile(new File([JSON.stringify(config)], 'example-config.json', { type: 'application/json' }))
-      setShowConfirmDialog(true)
-    } catch (error) {
-      console.error('加载示例配置失败:', error)
-      alert('加载示例配置失败')
-    }
-  }
+
 
   const confirmImport = async () => {
     if (!pendingFile) return
@@ -198,15 +184,6 @@ export function ConfigManager({ onClose, onImportSuccess }: ConfigManagerProps) 
                   </span>
                 </Button>
               </label>
-              <Button
-                variant="outline"
-                onClick={loadExampleConfig}
-                disabled={importing}
-                className="flex items-center gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                试试示例配置
-              </Button>
             </div>
           </div>
 
