@@ -57,6 +57,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 如果所有进程都失败了，返回错误状态
+    if (results.imported === 0 && results.skipped === 0 && results.errors.length > 0) {
+      return NextResponse.json({
+        error: '配置导入失败',
+        results
+      }, { status: 400 });
+    }
+
     return NextResponse.json({
       message: '配置导入完成',
       results
