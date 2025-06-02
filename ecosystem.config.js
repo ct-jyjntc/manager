@@ -17,9 +17,9 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      log_file: '/var/log/process-keeper/combined.log',
-      out_file: '/var/log/process-keeper/out.log',
-      error_file: '/var/log/process-keeper/error.log',
+      log_file: '/var/log/manager/combined.log',
+      out_file: '/var/log/manager/out.log',
+      error_file: '/var/log/manager/error.log',
       time: true
     }
   ]

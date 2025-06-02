@@ -76,7 +76,7 @@ if command -v ufw &> /dev/null; then
 fi
 
 # 创建日志目录
-mkdir -p /var/log/ma'na'ge'r
+mkdir -p /var/log/manager
 
 echo "✅ 部署完成！"
 echo ""

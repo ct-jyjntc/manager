@@ -13,17 +13,5 @@
       "local",
       "default"
     ]
-  },
-  "rv2c42ozm": {
-    "id": "rv2c42ozm",
-    "name": "测试服务器",
-    "host": "192.168.1.100",
-    "port": 22,
-    "username": "root",
-    "status": "offline",
-    "createdAt": "2025-06-02T20:30:28.539Z",
-    "description": "这是一个测试服务器",
-    "tags": [],
-    "isLocal": false
   }
 }
