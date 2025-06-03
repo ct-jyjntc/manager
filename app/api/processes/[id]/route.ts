@@ -37,9 +37,6 @@ export async function POST(
       case 'stop':
         success = realProcessManager.stopProcess(id);
         break;
-      case 'restart':
-        success = await realProcessManager.restartProcess(id);
-        break;
       default:
         return NextResponse.json({ error: '无效的操作' }, { status: 400 });
     }

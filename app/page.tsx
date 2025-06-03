@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Play, Square, RotateCcw, Trash2, Activity, Server, FileText, Settings, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import { Plus, Play, Square, Trash2, Activity, Server, FileText, Settings, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -395,17 +395,7 @@ export default function Home() {
                     <span>停止</span>
                   </Button>
                 )}
-                
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => performAction(process.id, 'restart')}
-                  className="flex items-center justify-center gap-1 h-8 text-xs"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  <span>重启</span>
-                </Button>
-                
+
                 <Button
                   size="sm"
                   variant="outline"

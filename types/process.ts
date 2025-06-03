@@ -26,6 +26,6 @@ export interface CreateProcessRequest {
 }
 
 export interface ProcessAction {
-  type: 'start' | 'stop' | 'restart' | 'delete';
+  type: 'start' | 'stop' | 'delete';
   processId: string;
 }
